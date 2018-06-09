@@ -1,16 +1,23 @@
 FROM ubuntu:16.04
 
-ENV PUPPET_SERVER_VERSION="5.3.1" DUMB_INIT_VERSION="1.2.1" UBUNTU_CODENAME="xenial" PUPPETSERVER_JAVA_ARGS="-Xms256m -Xmx256m" PATH=/opt/puppetlabs/server/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/bin:$PATH PUPPET_HEALTHCHECK_ENVIRONMENT="production"
+ARG vcs_ref
+ARG build_date
+ENV PUPPET_SERVER_VERSION="5.3.1"
+ENV DUMB_INIT_VERSION="1.2.1"
+ENV UBUNTU_CODENAME="xenial"
+ENV PUPPETSERVER_JAVA_ARGS="-Xms256m -Xmx256m"
+ENV PATH=/opt/puppetlabs/server/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/bin:$PATH
+ENV PUPPET_HEALTHCHECK_ENVIRONMENT="production"
 
 LABEL org.label-schema.maintainer="Puppet Release Team <release@puppet.com>" \
       org.label-schema.vendor="Puppet" \
-      org.label-schema.url="https://github.com/puppetlabs/puppet-in-docker" \
+      org.label-schema.url="https://github.com/puppetlabs/puppetserver" \
       org.label-schema.name="Puppet Server (No PuppetDB)" \
       org.label-schema.license="Apache-2.0" \
       org.label-schema.version=$PUPPET_SERVER_VERSION \
-      org.label-schema.vcs-url="https://github.com/puppetlabs/puppet-in-docker" \
-      org.label-schema.vcs-ref="b75674e1fbf52f7821f7900ab22a19f1a10cafdb" \
-      org.label-schema.build-date="2018-05-09T20:11:01Z" \
+      org.label-schema.vcs-url="https://github.com/puppetlabs/puppetserver" \
+      org.label-schema.vcs-ref=$vcs_ref \
+      org.label-schema.build-date=$build_date \
       org.label-schema.schema-version="1.0" \
       org.label-schema.dockerfile="/Dockerfile"
 
