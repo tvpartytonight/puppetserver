@@ -60,6 +60,20 @@ class Puppet::Server::Master
         response["X-Puppet-Version"])
   end
 
+  def convert_java_args_to_ruby(hash)
+    Hash[hash.collect do |key, value|
+        # Stolen and modified from params_to_ruby in handler.rb, main change is to recurse into
+        # nested values.
+        newkey = key.to_s
+        newkey.slice!(0)
+        if value.java_kind_of?(Java::ClojureLang::PersistentArrayMap)
+          [newkey, convert_java_args_to_ruby(value)]
+        else
+          [newkey, value.java_kind_of?(Java::JavaUtil::List) ? value.to_a : value]
+        end
+      end]
+  end
+
   def compileCatalog(_request_data)
     {}
   end
