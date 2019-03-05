@@ -80,6 +80,16 @@ module Puppet
         return result, log_entries
       end
 
+      def save_facts(facts, trusted_facts)
+        Puppet.override({trusted_information: trusted_facts}) do
+          Puppet::Node::Facts.indirection.save(facts)
+        end
+      end
+
+      def save_catalog(catalog)
+        Puppet::Resource::Catalog.indirection.save(catalog)
+      end
+
       def create_node(request_data)
         # We need an environment to talk to PDB
         request_data['environment'] ||= 'production'
