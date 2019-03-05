@@ -756,7 +756,8 @@
   (let [facts (ring-codec/url-decode (get (:form-params request) "facts"))]
     {"facts" {"values" (get (json/decode facts false) "values")}
      "certname" (last (str/split (:uri request) #"/"))
-     "job_id" (current-code-id-fn (jruby-request/get-environment-from-request request))}))
+     "job_id" (current-code-id-fn (jruby-request/get-environment-from-request request))
+     "persistence" {"facts" true "catalog" false}}))
 
 
 (schema/defn ^:always-validate
@@ -765,13 +766,13 @@
    get-code-content-fn
    current-code-id-fn]
   (fn [request]
-    ( let [environment (jruby-request/get-environment-from-request request)]
+    ( let [environment (jruby-request/get-environment-from-request request)
+           body (jruby-protocol/compile-catalog jruby-service
+                                                (:jruby-instance request)
+                                                (convert-url-encoded-to-clojure-structure request current-code-id-fn))]
      {:status 200
       :headers {"Content-Type" "application/json"}
-      :body (json/encode
-             (jruby-protocol/compile-catalog jruby-service
-                                             (:jruby-instance request)
-                                             (convert-url-encoded-to-clojure-structure request current-code-id-fn)))})))
+      :body (json/encode (get (json/decode (json/encode body) false) "catalog" ))})))
 
 (schema/defn ^:always-validate
   v4-catalog-handler :- IFn

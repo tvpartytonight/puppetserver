@@ -15,10 +15,11 @@ module Puppet
       # @return [Hash] containing either just the catalog or catalog and logs,
       #                if capturing logs was enabled
       def compile(request_data)
-        persist = processed_hash['persistence']
+        persist = request_data['persistence']
         options = request_data['options'] || {}
 
         if persist['facts']
+          node = create_node(request_data)
           save_facts(node.facts, node.trusted_data)
         end
 
