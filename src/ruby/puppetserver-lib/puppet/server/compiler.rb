@@ -10,28 +10,28 @@ module Puppet
 
       def compile(request_data)
         processed_hash = convert_java_args_to_ruby(request_data)
+        persist = processed_hash['persistence']
 
         node = create_node(processed_hash)
 
+        if persist['facts']
+          save_facts(node.facts, node.trusted_data)
+        end
+
         catalog = Puppet::Parser::Compiler.compile(node, processed_hash['job_id'])
 
-        maybe_save(processed_hash, node.facts, catalog)
+        if persist['catalog']
+          save_catalog(catalog)
+        end
 
         catalog.to_data_hash
       end
 
       private
 
-      def maybe_save(processed_hash, facts, catalog)
-        nodename = processed_hash['certname']
-        persist = processed_hash['persistence']
-        options = processed_hash.
-                    slice("environment", "transaction_id").
-                    map {|key, val| [key.intern, val] }.to_h
-
-        if persist['facts']
+      def save_facts(facts, trusted_facts)
           if Puppet::Node::Facts.indirection.terminus_class.to_s == "puppetdb"
-            Puppet.override({trusted_information: processed_hash['trusted_facts']}) do
+            Puppet.override({trusted_information: trusted_facts}) do
               Puppet::Node::Facts.indirection.save(facts)
             end
           else
@@ -39,12 +39,11 @@ module Puppet
           end
         end
 
-        if persist['catalog']
-          if Puppet::Resource::Catalog.indirection.cache_class.to_s == "puppetdb"
-            Puppet::Resource::Catalog.indirection.save(catalog)
-          else
-            raise Puppet::Error, "PuppetDB not configured, not saving Catalog"
-          end
+      def save_catalog(catalog)
+        if Puppet::Resource::Catalog.indirection.cache_class.to_s == "puppetdb"
+          Puppet::Resource::Catalog.indirection.save(catalog)
+        else
+          raise Puppet::Error, "PuppetDB not configured, not saving Catalog"
         end
       end
 
