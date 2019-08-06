@@ -13,22 +13,29 @@ package com.puppetlabs.puppetserver;
 public class JRubyPuppetResponse {
     private final Integer status;
     private final Object body;
+    private final Object analytics;
     private final String contentType;
     private final String puppetVersion;
 
     public JRubyPuppetResponse(
             Integer status,
             Object body,
+            Object analytics,
             String contentType,
             String puppetVersion) {
         this.status = status;
         this.body = body;
+        this.analytics = analytics;
         this.contentType = contentType;
         this.puppetVersion = puppetVersion;
     }
 
     public Object getBody() {
         return body;
+    }
+
+    public Object getAnalytics() {
+        return analytics;
     }
 
     public Integer getStatus() {

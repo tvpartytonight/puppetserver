@@ -94,6 +94,7 @@
                  [puppetlabs/dujour-version-check]
                  [puppetlabs/http-client]
                  [puppetlabs/comidi]
+                 [puppetlabs/analytics-client]
                  [puppetlabs/i18n]]
 
   :main puppetlabs.trapperkeeper.main

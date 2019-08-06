@@ -45,7 +45,8 @@ class Puppet::Server::Master
 
   def handleRequest(request)
     response = {}
-    Puppet.override(lookup_key_recorder: Puppet::Server::KeyRecorder.new) do
+    key_recorder = Puppet::Server::KeyRecorder.new
+    Puppet.override(lookup_key_recorder: key_recorder) do
       process(request, response)
       # 'process' returns only the status -
       # `response` now contains all of the response data
@@ -64,8 +65,13 @@ class Puppet::Server::Master
     com.puppetlabs.puppetserver.JRubyPuppetResponse.new(
         response[:status],
         body_to_return,
+        transform_for_analytics(key_recorder),
         response[:content_type],
         response["X-Puppet-Version"])
+  end
+
+  # dummy method for now
+  def transform_for_analytics(key_recorder)
   end
 
   def compileCatalog(request_data)

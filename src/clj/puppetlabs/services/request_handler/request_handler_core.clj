@@ -12,6 +12,7 @@
             [puppetlabs.puppetserver.ring.middleware.params :as pl-ring-params]
             [puppetlabs.puppetserver.jruby-request :as jruby-request]
             [schema.core :as schema]
+            [puppetlabs.analytics-client.core :as analytics-client]
             [puppetlabs.i18n.core :as i18n]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -50,6 +51,15 @@
       :body    (.getBody response)
       :headers {"Content-Type"     (.getContentType response)
                 "X-Puppet-Version" (.getPuppetVersion response)}})
+
+(defn report_analytics
+  "Reports analytics if found in JRubyPuppetResponse"
+  [response]
+  (let [analytics (.getAnalytics response)
+        config (unsure-how-to-get-ssl-config)]
+    (if-not (empty? analytics)
+      (analytics-client/store-event config analytics))
+    response))
 
 (defn body-for-jruby
   "Converts the body from a request into a String if it is a non-binary
@@ -271,6 +281,7 @@
          clojure.walk/stringify-keys
          make-request-mutable
          (.handleRequest (:jruby-instance request))
+         report_analytics
          response->map)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
